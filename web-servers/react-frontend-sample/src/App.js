@@ -2,8 +2,8 @@ import './App.css';
 
 function App() {
   return <div className="App">
-      <img src="https://paketo.io/images/paketo-logo-full-color.png" alt="Paketo Buildpacks logo"></img>
-      Powered by Paketo Buildpacks
+      <img src="https://nkspknddghh.s3.ap-south-1.amazonaws.com/securepacks.png" alt="Initializ Buildpacks logo"></img>
+      Powered by Initializ Buildpacks
   </div>;
 }
 
