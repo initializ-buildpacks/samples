@@ -55,7 +55,7 @@ jobs:
 
     - name: Set default Pack CLI builder
       run: |
-        pack config default-builder initializbuildpacks/securepacks-initzbuilder
+        pack config default-builder initializbuildpacks/securepacks
 
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
