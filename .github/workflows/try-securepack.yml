@@ -51,15 +51,15 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ~/.pack
-        key: ${{ runner.os }}-pack-cli
+        key: ${{ runner.os }}-pack-cli-v0.34.2
         restore-keys: |
-          ${{ runner.os }}-pack-cli
+          ${{ runner.os }}-pack-cli-v0.34.2
 
     - name: Install Pack CLI if not cached
       run: |
         if [ ! -f ~/.pack/pack ]; then
           mkdir -p ~/.pack
-          wget -O ~/.pack/pack.tar.gz https://github.com/buildpacks/pack/releases/download/v0.23.0/pack-v0.23.0-linux.tgz
+          wget -O ~/.pack/pack.tar.gz https://github.com/buildpacks/pack/releases/download/v0.34.2/pack-v0.34.2-linux.tgz
           tar -xzf ~/.pack/pack.tar.gz -C ~/.pack
           sudo mv ~/.pack/pack /usr/local/bin/pack
         else
@@ -77,6 +77,21 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-buildx-
 
+    - name: Cache builder image
+      id: cache-builder-image
+      uses: actions/cache@v3
+      with:
+        path: /home/runner/.cache/docker/buildx
+        key: ${{ runner.os }}-builder-image
+        restore-keys: |
+          ${{ runner.os }}-builder-image
+
+    - name: Pull builder image if not cached
+      run: |
+        if ! docker pull buildpacksio/lifecycle:0.19.7; then
+          docker pull buildpacksio/lifecycle:0.19.7
+        fi
+
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
       with:
@@ -90,18 +105,13 @@ jobs:
         
         if [ "${{ env.app_type }}" == "go" ]; then
           echo "Building a Go application..."
-          pack build $image_name_with_tag
+          pack build $image_name_with_tag --builder buildpacksio/builder:v1.3.1 --buildpack paketo-buildpacks/go
         elif [ "${{ env.app_type }}" == "static_site" ]; then
           echo "Building a static site..."
-          pack build $image_name_with_tag --buildpack initializ-buildpacks/web-servers \
-                                          --env BP_WEB_SERVER=nginx \
-                                          --env BP_WEB_SERVER_ROOT=/workspace
+          pack build $image_name_with_tag --builder buildpacksio/builder:v1.3.1 --buildpack paketo-buildpacks/nginx
         else
           echo "Building a Node.js application with static site generation..."
-          pack build $image_name_with_tag --buildpack initializ-buildpacks/web-servers \
-                                          --env BP_NODE_RUN_SCRIPTS=build \
-                                          --env BP_WEB_SERVER=nginx \
-                                          --env BP_WEB_SERVER_ROOT=build
+          pack build $image_name_with_tag --builder buildpacksio/builder:v1.3.1 --buildpack paketo-buildpacks/nodejs
         fi
 
         docker push $image_name_with_tag
