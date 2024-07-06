@@ -18,8 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Clone specified repository
-      run: |
-        git clone ${{ github.event.inputs.repo_url }} repo 
+      run: git clone ${{ github.event.inputs.repo_url }} repo
 
     - name: Set up environment variable for directory
       id: set-dir
@@ -47,15 +46,36 @@ jobs:
           echo "app_type=nodejs" >> $GITHUB_ENV
         fi
 
-    - name: Install Pack CLI
+    - name: Cache Pack CLI
+      id: cache-pack-cli
+      uses: actions/cache@v3
+      with:
+        path: ~/.pack
+        key: ${{ runner.os }}-pack-cli
+        restore-keys: |
+          ${{ runner.os }}-pack-cli
+
+    - name: Install Pack CLI if not cached
       run: |
-        sudo add-apt-repository ppa:cncf-buildpacks/pack-cli -y
-        sudo apt-get update
-        sudo apt-get install pack-cli -y
+        if [ ! -f ~/.pack/pack ]; then
+          mkdir -p ~/.pack
+          wget -O ~/.pack/pack.tar.gz https://github.com/buildpacks/pack/releases/download/v0.23.0/pack-v0.23.0-linux.tgz
+          tar -xzf ~/.pack/pack.tar.gz -C ~/.pack
+          sudo mv ~/.pack/pack /usr/local/bin/pack
+        else
+          sudo ln -s ~/.pack/pack /usr/local/bin/pack
+        fi
 
     - name: Set default Pack CLI builder
-      run: |
-        pack config default-builder initializbuildpacks/securepacks
+      run: pack config default-builder initializbuildpacks/securepacks
+
+    - name: Cache Docker layers
+      uses: actions/cache@v3
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-buildx-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-buildx-
 
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
