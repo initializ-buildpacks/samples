@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Powered By Paketo Buildpacks</title>
+    <title>Powered By Initializ Buildpacks</title>
   </head>
   <body>
 <?php
-echo '<img style="display: block; margin-left: auto; margin-right: auto; width: 50%;" src="https://paketo.io/images/paketo-logo-full-color.png"></img>';
+echo '<img style="display: block; margin-left: auto; margin-right: auto; width: 50%;" src="https://nkspknddghh.s3.ap-south-1.amazonaws.com/securepacks.png"></img>';
 
 //simple counter to test sessions. should increment on each page reload.
 session_start();
