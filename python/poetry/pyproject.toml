@@ -6,8 +6,8 @@ authors = []
 
 [tool.poetry.dependencies]
 python = "^3.10"
-Flask = "2.3.2"
-gunicorn = "^20.1.0"
+Flask = "3.0.3"
+gunicorn = "^22.0.0"
 
 [tool.poetry.dev-dependencies]
 
